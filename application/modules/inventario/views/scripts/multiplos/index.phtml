@@ -1,0 +1,45 @@
+<?php 
+	$producto = $this->producto;
+	$multiplos = $this->multiplos; 
+	$unidad = $this->unidad;
+	$formulario = $this->formulario;
+	$formulario->setAction($this->url(array("module"=>"inventario", "controller"=>"multiplos", "action" => "alta"), null, true));
+	$unidadDAO = new Inventario_DAO_Unidad;
+	
+?>
+<section class="row">
+	<div class="panel panel-success">
+		<div class="panel-heading">
+			<h3 class="panel-title">Multiplos: <strong><?php echo $producto->getProducto() ?></strong></h3>
+		</div>
+		<div class="panel-body">
+			<a class="btn btn-success" href="<?php echo $this->url(array("module"=>"inventario","controller"=>"multiplos","action"=>"alta","idProducto"=>$producto->getIdProducto()),null,true); ?>">
+				<span class="glyphicon glyphicon-plus"></span> Nuevo Multiplo
+			</a>
+			<table class="table table-condensed table-striped">
+				<thead>
+					<th>Configurar</th>
+					<th>Producto</th>
+					<th>Cantidad</th>
+					<th>Unidad</th>
+				</thead>
+				<tbody>
+					<?php foreach ($multiplos as $multiplo) : 
+						$unidad = $unidadDAO->obtenerUnidad($multiplo->getIdUnidad());
+					?>
+					<tr>
+						<td>
+							<a class="btn btn-warning" href="<?php echo $this->url(array("module"=>"inventario","controller"=>"multiplos","action"=>"edita","idMultiplos"=>$multiplo->getIdMultiplos()),null,true); ?>">
+								<span class="glyphicon glyphicon-cog"></span> Configurar 
+							</a>
+						</td>
+						<td><?php echo $producto->getProducto() ?></td>
+						<td><?php echo $multiplo->getCantidad() ?></td>
+						<td><?php echo $unidad->getUnidad() ?></td>
+					</tr>
+					<?php endforeach ?>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</section>

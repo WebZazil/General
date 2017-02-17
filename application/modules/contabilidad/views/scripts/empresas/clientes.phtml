@@ -1,0 +1,183 @@
+<?php
+	$fiscalesEmpresas = $this->fiscalesEmpresas;
+	$fiscalesDAO = new Sistema_DAO_Fiscales;
+	$fiscalesClientes = $fiscalesDAO->obtenerFiscalesClientes();
+	$fiscalesDAO->getFiscalesClientes();
+?>
+<section class="row">
+	<div class="panel panel-warning">
+		<div class="panel-heading">
+			<h3 class="panel-title">Asociar Clientes a Empresas</h3>
+		</div>
+		<div class="panel-body">
+			<div class="col-xs-12">
+				<table class="table table-condensed">
+					<tbody>
+						<tr>
+							<td>Seleccione Empresa</td>
+							<td>
+								<select id="selectIdFiscales" class="form-control">
+									<?php foreach ($fiscalesEmpresas as $fiscales) : ?>
+										<option value="<?php echo $fiscales["idFiscales"]; ?>"><?php echo $fiscales["razonSocial"]; ?></option>
+									<?php endforeach; ?>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<button id="asociarCliente" class="btn btn-warning" type="button" data-toggle="modal" data-target="#msgConfirm">
+									<span class="glyphicon glyphicon-random"></span> Asociar Cliente
+								</button>
+							</td>
+							<td>
+								<select id="selectIdClientes" class="form-control">
+								</select>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<br /><hr /><br />
+			<div class="col-xs-12">
+				<table id="clientesEmpresa" class="table table-striped table-condensed">
+					<thead>
+						<th>R.F.C.</th>
+						<th>Razón Social</th>
+					</thead>
+					<tbody>
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</section>
+<!-- Message Config -->
+<div class="modal fade" id="msgConfirm" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title">Confirmar Asociación.</h4>
+			</div>
+			<div class="modal-body">
+				¿Esta seguro de asociar el cliente: <strong><span id="cliente"></span></strong> a la empresa: <strong><span id="empresa"></span></strong> ? 
+			</div>
+			<div class="modal-footer">
+				<button id="asociarClienteEmpresa" type="button" class="btn btn-success" data-dismiss="modal">
+					<span class="glyphicon glyphicon-random"></span> Asociar
+				</button>
+				<button type="button" class="btn btn-danger" data-dismiss="modal">
+					<span class="glyphicon glyphicon-close"></span> Cancelar
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<script>
+	$().ready(function() {
+		
+		var fiscales = <?php echo Zend_Json::encode($fiscalesDAO->getFiscalesClientes()); ?>;
+		// Cargamos el combo de clientes con el JSON recien cargado
+		$.each(fiscales, function(i,item) {
+			$("select#selectIdClientes").append($("<option></option>").attr("value",fiscales[i].idFiscales).text(fiscales[i].razonSocial));
+		});
+		
+		var idFiscales = $("select#selectIdFiscales").val();
+		var url = window.location.origin + "/General/public/contabilidad/json/clientese/idFiscales/"+idFiscales;
+		
+		$.ajax({
+			url: url,
+			dataType: "json",
+			success: function(data){
+				console.log(url);
+				console.dir(data);
+				
+				var tbody = $("table#clientesEmpresa").find('tbody');
+				tbody.empty();
+				$.each(data, function(i,item){
+					tbody.append($('<tr>').
+						append($('<td>').append(data[i].rfc)).
+						append($('<td>').append(data[i].razonSocial))
+					);
+				});
+			}
+		});
+		
+		$("button#asociarCliente").on('click',function() {
+			$("span#cliente").text($("select#selectIdClientes option:selected ").text());
+			$("span#empresa").text($("select#selectIdFiscales option:selected ").text());
+		});
+		
+		/**
+		 * Aqui hacemos la asociacion real
+		 */
+		$("button#asociarClienteEmpresa").on('click',function() {
+			
+			var selectEmpresa = $("select#selectIdFiscales");
+			var selectCliente = $("select#selectIdClientes");
+			
+			var fempresa = selectEmpresa.val();
+			var fcliente = selectCliente.val();
+			
+			
+			var url = window.location.origin + "/General/public/"+"contabilidad/opera/asocclientee/idFiscalesEmpresa/" + fempresa + "/idFiscalesCliente/" + fcliente;
+			
+			console.log(url);
+			
+			$.ajax({
+				url: url,
+			});
+			// Volvemos a cargar la tabla, asi traemos los valores actualizados.
+			$url = window.location.origin + "/General/public/"+"contabilidad/json/clientese/idFiscales/"+fempresa;
+			$.ajax({
+				url: $url,
+				dataType: "json",
+				success: function(data){
+					//console.log($url);
+					//console.dir(data);
+					
+					var tbody = $("table#clientesEmpresa").find('tbody');
+					tbody.empty();
+					$.each(data, function(i,item){
+						tbody.append($('<tr>').
+							append($('<td>').append(data[i].rfc)).
+							append($('<td>').append(data[i].razonSocial))
+						);
+					});
+				}
+			});
+			
+		});
+		
+		/**
+		 * Buscamos los clientes ya asociados de la empresa seleccionada
+		 */
+		$("select#selectIdFiscales").on('change',function() {
+			
+			$url = window.location.origin + "/General/public/"+"contabilidad/json/clientese/idFiscales/"+$(this).val();
+			console.log($url);
+			$.ajax({
+				url: $url,
+				dataType: "json",
+				success: function(data){
+					//console.log($url);
+					//console.dir(data);
+					
+					var tbody = $("table#clientesEmpresa").find('tbody');
+					tbody.empty();
+					$.each(data, function(i,item){
+						tbody.append($('<tr>').
+							append($('<td>').append(data[i].rfc)).
+							append($('<td>').append(data[i].razonSocial))
+						);
+					});
+				}
+			});
+			
+		});
+		
+	});
+</script>
