@@ -13,7 +13,7 @@ RewriteEngine On
 #DirectoryIndex index.php
 
 #Options ExecCGI Includes IncludesNOEXEC SymLinksIfOwnerMatch -Indexes
-Options -Indexes
+#Options -Indexes
 #ErrorDocument 500 /errorpages/500.html
 
 

@@ -12,7 +12,8 @@ class Encuesta_DAO_Login {
     private $tableRol;
 
 	function __construct() {
-	    $dbBaseAdapter = Zend_Registry::get("dbbaseencuesta");
+	    //$dbBaseAdapter = Zend_Registry::get("dbbaseencuesta");
+	    $dbBaseAdapter = Zend_Registry::get("dbmodadmin");
         
 		$this->tableOrganizacion = new Encuesta_Model_DbTable_Organizacion(array('db'=>$dbBaseAdapter));
         $this->tableSubscripcion = new Encuesta_Model_DbTable_Subscripcion(array('db'=>$dbBaseAdapter));
@@ -61,7 +62,7 @@ class Encuesta_DAO_Login {
     public function loginByClaveOrganizacion($claveOrganizacion) {
         if(!is_null($claveOrganizacion)){
             $organizacion = $this->getOrganizacionByClave($claveOrganizacion);
-            $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Registry::get('dbbaseencuesta'),"Usuario","nickname","password",'SHA1(?)');
+            $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Registry::get('dbmodadmin'),"Usuario","nickname","password",'SHA1(?)');
             $authAdapter->setIdentity("test")->setCredential("zazil");
             
             $auth = Zend_Auth::getInstance();

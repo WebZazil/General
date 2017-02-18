@@ -56,7 +56,7 @@ class Encuesta_HomeController extends Zend_Controller_Action
             */
             //echo hash("sha1", $datos["password"]);
             
-            $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Registry::get('dbbaseencuesta'),"Usuario","nickname","password",'SHA1(?)');
+            $authAdapter = new Zend_Auth_Adapter_DbTable(Zend_Registry::get('dbmodadmin'),"Usuario","nickname","password",'SHA1(?)');
             $authAdapter->setIdentity($datos["usuario"])->setCredential($datos["password"]);
             $auth = Zend_Auth::getInstance();
             $resultado = $auth->authenticate($authAdapter);
